@@ -1,26 +1,134 @@
 @import "tailwindcss";
+@import "../styles/swiper-custom.css";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fff5f5;
+  --foreground: #4a2c2c;
+  --primary: #ff6b6b;
+  --primary-light: #ffb8b8;
+  --primary-dark: #c83e3e;
+  --secondary: #a0616a;
+  --accent: #ff9999;
+  --card-bg: #fff9f9;
+  --card-shadow: rgba(255, 107, 107, 0.2);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-light: var(--primary-light);
+  --color-primary-dark: var(--primary-dark);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #2d1a1a;
+    --foreground: #f5e0e0;
+    --primary: #ff6b6b;
+    --primary-light: #ff9999;
+    --primary-dark: #c83e3e;
+    --secondary: #a0616a;
+    --accent: #ff9999;
+    --card-bg: #3a2222;
+    --card-shadow: rgba(255, 107, 107, 0.3);
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Card Flip Animation */
+.card-container {
+  perspective: 1000px;
+}
+
+.card {
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+
+.card-front, .card-back {
+  backface-visibility: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.card-back {
+  transform: rotateY(180deg);
+}
+
+/* Only flip on hover if the class is present */
+.card-container.flip-on-hover:hover .card {
+  transform: rotateY(180deg);
+}
+
+/* Visual indicator for cards with flip disabled */
+.card-container.no-flip::after {
+  content: '';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 8px;
+  height: 8px;
+  background-color: #f87171;
+  border-radius: 50%;
+  z-index: 10;
+}
+
+/* Improve card appearance */
+.card-container {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Add a subtle hover effect for all cards */
+.card-container:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+}
+
+/* Heart Animation */
+@keyframes float {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(10deg);
+  }
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
+.floating-heart {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-light);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
 }
