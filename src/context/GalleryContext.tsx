@@ -93,60 +93,73 @@ export function GalleryProvider({ children }: { children: ReactNode }) {
       setLoading(false);
       return;
     }
-
+  
     const fetchInitialData = async () => {
       try {
         setLoading(true);
         setError(null);
-
+  
         // Fetch all sections
         const fetchedSections = await galleryService.fetchSections(user.uid);
         setSections(fetchedSections);
-
+  
         // Fetch section counts
         const sectionCounts = await galleryService.fetchSectionCounts(user.uid, fetchedSections);
         setSectionImageCounts(sectionCounts);
-
-        // Fetch images for each section
-        const allImages: Image[] = [];
+  
+        // Track all images in a set to avoid duplicates
+        const allImageMap = new Map<string, Image>();
         const sectionDocs: Record<string, QueryDocumentSnapshot<DocumentData> | null> = {};
         const initialFlipSettings: Record<string, boolean> = {};
         const featuredImgs: Image[] = [];
-
+  
         // Fetch images for each section (limited to IMAGES_PER_SECTION)
         const sectionFetchPromises = fetchedSections.map(section =>
           galleryService.fetchImagesBySection(user.uid, section, IMAGES_PER_SECTION)
         );
-
+  
         const sectionResults = await Promise.all(sectionFetchPromises);
-
+  
         // Process results
         sectionResults.forEach((result, index) => {
           const section = fetchedSections[index];
           const { images, lastDoc } = result;
-
-          // Add images to the all images array
-          allImages.push(...images);
-
-          // Set flip settings for each image
+  
+          // Add images to the map to avoid duplicates
           images.forEach(image => {
+            allImageMap.set(image.id, image);
+            
+            // Set flip settings for each image
             initialFlipSettings[image.id] = true; // Default to flip on hover
-
+  
             // Add to featured images if needed
             if (image.featured) {
               featuredImgs.push(image);
             }
           });
-
+  
           // Store the last document for each section for pagination
           if (lastDoc) {
             sectionDocs[section] = lastDoc;
           }
         });
-
+  
         // Get all images for the main view (limited to IMAGES_PER_BATCH)
         const allImagesResult = await galleryService.fetchAllImages(user.uid, IMAGES_PER_BATCH);
-
+        
+        // Add these images to our map too
+        allImagesResult.images.forEach(image => {
+          allImageMap.set(image.id, image);
+          
+          // Set flip settings
+          initialFlipSettings[image.id] = true;
+          
+          // Add to featured if needed
+          if (image.featured && !featuredImgs.some(feat => feat.id === image.id)) {
+            featuredImgs.push(image);
+          }
+        });
+  
         // Set last document for main pagination
         if (allImagesResult.lastDoc) {
           setLastDoc(allImagesResult.lastDoc);
@@ -154,24 +167,27 @@ export function GalleryProvider({ children }: { children: ReactNode }) {
         } else {
           setHasMore(false);
         }
-
+  
+        // Convert map to array and sort
+        const allImagesArray = Array.from(allImageMap.values())
+          .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  
         // Update state with all fetched data
-        setImages(allImages);
+        setImages(allImagesArray);
         setFeaturedImages(featuredImgs);
         setFlipOnHoverSettings(initialFlipSettings);
         setSectionLastDocs(sectionDocs);
-
+  
       } catch (error) {
         handleError(error);
       } finally {
         setLoading(false);
       }
     };
-
+  
     fetchInitialData();
-
+  
   }, [user, handleError, setError]);
-
   // Add a new image
   const addImage = async (
     file: File,
@@ -181,11 +197,11 @@ export function GalleryProvider({ children }: { children: ReactNode }) {
     description: string = ''
   ): Promise<string | undefined> => {
     if (!user) return;
-
+  
     try {
       setUploadingImage(true);
       setError(null);
-
+  
       // Add image using service
       const newImage = await galleryService.addImage(
         user.uid,
@@ -195,29 +211,29 @@ export function GalleryProvider({ children }: { children: ReactNode }) {
         featured,
         description
       );
-
-      // Update local state
-      setImages(prevImages => [newImage, ...prevImages]);
-
+  
+      // Update local state using mergeImageArrays to prevent duplicates
+      setImages(prevImages => mergeImageArrays(prevImages, [newImage]));
+  
       // Add to featured images if needed
       if (featured) {
-        setFeaturedImages(prev => [newImage, ...prev]);
+        setFeaturedImages(prev => mergeImageArrays(prev, [newImage]));
       }
-
+  
       // Add section if it's new
       if (!sections.includes(section)) {
         setSections(prevSections => [...prevSections, section]);
       }
-
+  
       // Update flip settings
       setFlipOnHoverSettings(prev => ({ ...prev, [newImage.id]: true }));
-
+  
       // Update section counts locally
       setSectionImageCounts(prev => updateCountsOnAdd(prev, section));
-
+  
       // Show success toast
       toast.success('Image uploaded successfully!');
-
+  
       return newImage.id;
     } catch (error) {
       toast.error('Failed to upload image. Please try again.');
@@ -226,6 +242,7 @@ export function GalleryProvider({ children }: { children: ReactNode }) {
       setUploadingImage(false);
     }
   };
+  
 
   // Delete an image
   const deleteImage = async (imageId: string): Promise<void> => {
@@ -266,37 +283,51 @@ export function GalleryProvider({ children }: { children: ReactNode }) {
   // Update image section
   const updateImageSection = async (imageId: string, newSection: string): Promise<void> => {
     if (!user) return;
-
+  
     try {
       setLoading(true);
       setError(null);
-
+  
       // Find the image to get its old section
       const imageToUpdate = images.find(image => image.id === imageId);
-      const oldSection = imageToUpdate?.section;
-
+      if (!imageToUpdate) {
+        throw new Error('Image not found');
+      }
+      
+      const oldSection = imageToUpdate.section;
+  
       // Update in Firestore
       await galleryService.updateImageSection(imageId, newSection);
-
-      // Update local state
-      setImages(prevImages =>
-        prevImages.map(image =>
-          image.id === imageId ? { ...image, section: newSection } : image
-        )
-      );
-
+  
+      // Create updated image
+      const updatedImage = { ...imageToUpdate, section: newSection };
+  
+      // Update local state using mergeImageArrays
+      setImages(prevImages => mergeImageArrays(
+        prevImages.filter(img => img.id !== imageId), 
+        [updatedImage]
+      ));
+  
+      // Update featured images if needed
+      if (updatedImage.featured) {
+        setFeaturedImages(prev => mergeImageArrays(
+          prev.filter(img => img.id !== imageId),
+          [updatedImage]  
+        ));
+      }
+  
       // Add section if it's new
       if (!sections.includes(newSection)) {
         setSections(prevSections => [...prevSections, newSection]);
       }
-
+  
       // Update section counts locally
-      if (oldSection && oldSection !== newSection) {
+      if (oldSection !== newSection) {
         setSectionImageCounts(prev =>
           updateCountsOnSectionChange(prev, oldSection, newSection)
         );
       }
-
+  
       // Show success toast
       toast.success('Image moved to ' + newSection + '!');
     } catch (error) {
@@ -363,13 +394,13 @@ export function GalleryProvider({ children }: { children: ReactNode }) {
   // Load more images (for infinite scrolling)
   const loadMoreImages = async (section?: string | null): Promise<void> => {
     if (!user || loadingMore) return;
-
+  
     try {
       setLoadingMore(true);
       setError(null);
-
+  
       let newImages: Image[] = [];
-
+  
       if (section) {
         // Load more images for a specific section
         const sectionLastDoc = sectionLastDocs[section];
@@ -379,9 +410,9 @@ export function GalleryProvider({ children }: { children: ReactNode }) {
           IMAGES_PER_BATCH,
           sectionLastDoc || undefined
         );
-
+  
         newImages = result.images;
-
+  
         // Update last document for this section
         if (result.lastDoc) {
           setSectionLastDocs(prev => ({
@@ -396,39 +427,49 @@ export function GalleryProvider({ children }: { children: ReactNode }) {
           setLoadingMore(false);
           return;
         }
-
+  
         const result = await galleryService.fetchAllImages(
           user.uid,
           IMAGES_PER_BATCH,
           lastDoc
         );
-
+  
         newImages = result.images;
-
+  
         // Update last document
         if (result.lastDoc) {
           setLastDoc(result.lastDoc);
         }
       }
-
+  
       if (newImages.length === 0) {
         setHasMore(false);
         setLoadingMore(false);
         return;
       }
-
-      // Process new images
-      const uniqueNewImages = filterDuplicateImages(images, newImages);
+  
+      // Use the improved helper function to merge images
+      setImages(prevImages => mergeImageArrays(prevImages, newImages));
+  
+      // Update flip settings for new images only
       const newFlipSettings: Record<string, boolean> = {};
-
-      uniqueNewImages.forEach(image => {
-        newFlipSettings[image.id] = true; // Default to flip on hover
+      newImages.forEach(image => {
+        if (!flipOnHoverSettings[image.id]) {
+          newFlipSettings[image.id] = true; // Default to flip on hover
+        }
       });
-
-      // Update images and flip settings
-      setImages(prev => [...prev, ...uniqueNewImages]);
-      setFlipOnHoverSettings(prev => ({ ...prev, ...newFlipSettings }));
-
+      
+      // Only update flip settings for new images
+      if (Object.keys(newFlipSettings).length > 0) {
+        setFlipOnHoverSettings(prev => ({ ...prev, ...newFlipSettings }));
+      }
+  
+      // Update featured images if any new images are featured
+      const newFeaturedImages = newImages.filter(img => img.featured);
+      if (newFeaturedImages.length > 0) {
+        setFeaturedImages(prev => mergeImageArrays(prev, newFeaturedImages));
+      }
+  
       // Check if there are more images to load
       setHasMore(newImages.length === IMAGES_PER_BATCH);
     } catch (error) {
@@ -437,6 +478,7 @@ export function GalleryProvider({ children }: { children: ReactNode }) {
       setLoadingMore(false);
     }
   };
+  
 
   // Toggle flip on hover for an image
   const toggleFlipOnHover = (imageId: string): void => {
@@ -459,7 +501,7 @@ export function GalleryProvider({ children }: { children: ReactNode }) {
     if (!user) return;
 
     try {
-      setLoading(true);
+      // setLoading(true);
       setError(null);
 
       // Find the image
@@ -566,4 +608,19 @@ export function GalleryProvider({ children }: { children: ReactNode }) {
   };
 
   return <GalleryContext.Provider value={value}>{children}</GalleryContext.Provider>;
+}
+
+export function mergeImageArrays(existingImages: Image[], newImages: Image[]): Image[] {
+  // Create a map of existing images by ID for quick lookup
+  const existingImageMap = new Map(existingImages.map(img => [img.id, img]));
+  
+  // Process new images
+  newImages.forEach(newImg => {
+    // If image already exists, use the newest version
+    existingImageMap.set(newImg.id, newImg);
+  });
+  
+  // Convert map back to array and sort by createdAt (newest first)
+  return Array.from(existingImageMap.values())
+    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 }
