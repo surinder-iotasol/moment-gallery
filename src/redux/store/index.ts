@@ -4,6 +4,7 @@ import storage from 'redux-persist/lib/storage';
 import createSagaMiddleware from 'redux-saga';
 import authReducer from '../slices/authSlice';
 import rootSaga from '../sagas';
+import galleryReducer from '../gallery/gallerySlice';
 
 // Configure persist options for auth
 const authPersistConfig = {
@@ -17,7 +18,8 @@ const persistedAuthReducer = persistReducer(authPersistConfig, authReducer);
 
 // Combine reducers
 const rootReducer = combineReducers({
-  auth: persistedAuthReducer
+  auth: persistedAuthReducer,
+  gallery: galleryReducer
   // Add other reducers here as needed
 });
 
