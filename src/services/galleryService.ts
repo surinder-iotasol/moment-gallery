@@ -40,13 +40,13 @@ export interface ImageQueryResult {
 }
 
 // Constants
-export const IMAGES_PER_BATCH = 9;
-export const IMAGES_PER_SECTION = 6;
 export const DEFAULT_SECTIONS = ['Favorites', 'Memories', 'Special Moments'];
 
 // Gallery service functions
 export const galleryService = {
   // Fetch images by section with pagination
+   IMAGES_PER_SECTION: 6,
+   IMAGES_PER_BATCH: 9,
   async fetchImagesBySection(userId: string, sectionName: string, limitCount: number, startAfterDoc?: QueryDocumentSnapshot<DocumentData>): Promise<ImageQueryResult> {
     try {
       let imageQuery = query(
