@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
+import { ReduxProvider } from "@/redux/provider";
 import { AuthProvider } from "@/context/AuthContext";
 import { GalleryProvider } from "@/context/GalleryContext";
 import { ThemeProvider } from "@/context/ThemeContext";
@@ -36,38 +37,40 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider>
-          <AuthProvider>
-            <GalleryProvider>
-              {children}
-              <Toaster
-                position="top-right"
-                toastOptions={{
-                  duration: 4000,
-                  style: {
-                    background: 'var(--background)',
-                    color: 'var(--foreground)',
-                    border: '1px solid var(--primary)',
-                    padding: '16px',
-                    borderRadius: '10px',
-                  },
-                  success: {
-                    iconTheme: {
-                      primary: '#e11d48',
-                      secondary: 'white',
+        <ReduxProvider>
+          <ThemeProvider>
+            <AuthProvider>
+              <GalleryProvider>
+                {children}
+                <Toaster
+                  position="top-right"
+                  toastOptions={{
+                    duration: 4000,
+                    style: {
+                      background: 'var(--background)',
+                      color: 'var(--foreground)',
+                      border: '1px solid var(--primary)',
+                      padding: '16px',
+                      borderRadius: '10px',
                     },
-                  },
-                  error: {
-                    iconTheme: {
-                      primary: '#e11d48',
-                      secondary: 'white',
+                    success: {
+                      iconTheme: {
+                        primary: '#e11d48',
+                        secondary: 'white',
+                      },
                     },
-                  },
-                }}
-              />
-            </GalleryProvider>
-          </AuthProvider>
-        </ThemeProvider>
+                    error: {
+                      iconTheme: {
+                        primary: '#e11d48',
+                        secondary: 'white',
+                      },
+                    },
+                  }}
+                />
+              </GalleryProvider>
+            </AuthProvider>
+          </ThemeProvider>
+        </ReduxProvider>
       </body>
     </html>
   );

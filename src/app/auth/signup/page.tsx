@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { FaHeart, FaEnvelope, FaLock, FaUser, FaUserPlus } from 'react-icons/fa';
 import { useAuth } from '@/context/AuthContext';
+// Note: We're still using the AuthContext, but it's now a wrapper around Redux
 
 export default function SignupPage() {
   const [name, setName] = useState('');
@@ -14,32 +15,33 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const { signup } = useAuth();
   const router = useRouter();
-  
-  const handleSubmit = async (e: React.FormEvent) => {
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!name || !email || !password || !confirmPassword) {
       setError('Please fill in all fields');
       return;
     }
-    
+
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
     }
-    
+
     if (password.length < 6) {
       setError('Password must be at least 6 characters');
       return;
     }
-    
+
     try {
       setError('');
       setIsLoading(true);
-      await signup(email, password, name);
+      // Redux saga will handle the async operation
+      signup(email, password, name);
       router.push('/gallery');
     } catch (error) {
       setError('Failed to create an account. Please try again.');
@@ -48,7 +50,7 @@ export default function SignupPage() {
       setIsLoading(false);
     }
   };
-  
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-background">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -57,16 +59,16 @@ export default function SignupPage() {
           <motion.div
             key={i}
             className="absolute text-primary-light opacity-30"
-            initial={{ 
-              x: Math.random() * 100 - 50 + '%', 
+            initial={{
+              x: Math.random() * 100 - 50 + '%',
               y: -50,
               scale: 0.5 + Math.random() * 1.5
             }}
-            animate={{ 
+            animate={{
               y: '120vh',
               rotate: Math.random() * 360
             }}
-            transition={{ 
+            transition={{
               duration: 15 + Math.random() * 20,
               repeat: Infinity,
               delay: Math.random() * 5
@@ -76,7 +78,7 @@ export default function SignupPage() {
           </motion.div>
         ))}
       </div>
-      
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -89,7 +91,7 @@ export default function SignupPage() {
               className="inline-block text-primary mb-4"
               initial={{ scale: 0.8 }}
               animate={{ scale: 1 }}
-              transition={{ 
+              transition={{
                 type: "spring",
                 stiffness: 260,
                 damping: 20
@@ -100,14 +102,14 @@ export default function SignupPage() {
             <h1 className="text-2xl font-bold text-foreground">Create Account</h1>
             <p className="text-foreground/70 mt-2">Sign up to store your romantic moments</p>
           </div>
-          
+
           <form onSubmit={handleSubmit}>
             {error && (
               <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 border border-red-400 text-red-700 dark:text-red-300 rounded">
                 {error}
               </div>
             )}
-            
+
             <div className="mb-4">
               <label htmlFor="name" className="block text-sm font-medium text-foreground/80 mb-1">
                 Full Name
@@ -127,7 +129,7 @@ export default function SignupPage() {
                 />
               </div>
             </div>
-            
+
             <div className="mb-4">
               <label htmlFor="email" className="block text-sm font-medium text-foreground/80 mb-1">
                 Email
@@ -147,7 +149,7 @@ export default function SignupPage() {
                 />
               </div>
             </div>
-            
+
             <div className="mb-4">
               <label htmlFor="password" className="block text-sm font-medium text-foreground/80 mb-1">
                 Password
@@ -167,7 +169,7 @@ export default function SignupPage() {
                 />
               </div>
             </div>
-            
+
             <div className="mb-6">
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground/80 mb-1">
                 Confirm Password
@@ -187,7 +189,7 @@ export default function SignupPage() {
                 />
               </div>
             </div>
-            
+
             <button
               type="submit"
               disabled={isLoading}
@@ -213,7 +215,7 @@ export default function SignupPage() {
               )}
             </button>
           </form>
-          
+
           <div className="mt-6 text-center">
             <p className="text-foreground/70">
               Already have an account?{' '}

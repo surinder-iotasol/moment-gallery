@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { FaHeart, FaEdit, FaTrash, FaExchangeAlt } from 'react-icons/fa';
+import { FaHeart, FaEdit, FaTrash, FaExchangeAlt, FaStar } from 'react-icons/fa';
 import { useGallery } from '@/context/GalleryContext';
 
 interface ImageCardProps {
@@ -11,14 +11,18 @@ interface ImageCardProps {
   imageUrl: string;
   moment: string;
   section: string;
+  featured?: boolean;
+  description?: string;
   onView: () => void;
 }
 
-export default function ImageCard({ id, imageUrl, moment, section, onView }: ImageCardProps) {
+export default function ImageCard({ id, imageUrl, moment, section, featured = false, description = '', onView }: ImageCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedMoment, setEditedMoment] = useState(moment);
-  const { deleteImage, updateImageMoment, flipOnHoverSettings, toggleFlipOnHover, sectionFlipDisabled } = useGallery();
+  const [isAddingToFeatured, setIsAddingToFeatured] = useState(false);
+  const [featuredDescription, setFeaturedDescription] = useState(description);
+  const { deleteImage, updateImageMoment, flipOnHoverSettings, toggleFlipOnHover, sectionFlipDisabled, toggleFeaturedStatus } = useGallery();
 
   // Check if this card should flip on hover
   // First check if the section has flip disabled, then check individual image setting
@@ -40,6 +44,29 @@ export default function ImageCard({ id, imageUrl, moment, section, onView }: Ima
     e.preventDefault();
     await updateImageMoment(id, editedMoment);
     setIsEditing(false);
+  };
+
+  // Handle toggling featured status
+  const handleToggleFeatured = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    if (featured) {
+      // If already featured, just remove from featured
+      await toggleFeaturedStatus(id);
+    } else {
+      // If not featured, show the description input
+      setIsAddingToFeatured(true);
+    }
+  };
+
+  // Handle saving featured status with description
+  const handleSaveFeatured = async (e: React.FormEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    await toggleFeaturedStatus(id, featuredDescription);
+    setIsAddingToFeatured(false);
+    setFeaturedDescription('');
   };
 
   return (
@@ -139,6 +166,15 @@ export default function ImageCard({ id, imageUrl, moment, section, onView }: Ima
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
+          className={`w-8 h-8 rounded-full bg-white/80 dark:bg-black/50 flex items-center justify-center ${featured ? 'text-yellow-400' : 'text-gray-400'}`}
+          onClick={handleToggleFeatured}
+          title={featured ? "Remove from featured" : "Add to featured"}
+        >
+          <FaStar />
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
           className="w-8 h-8 rounded-full bg-white/80 dark:bg-black/50 flex items-center justify-center text-blue-500"
           onClick={handleEdit}
           title="Edit moment"
@@ -155,6 +191,48 @@ export default function ImageCard({ id, imageUrl, moment, section, onView }: Ima
           <FaTrash />
         </motion.button>
       </div>
+
+      {/* Featured Description Modal */}
+      {isAddingToFeatured && (
+        <div
+          className="absolute inset-0 bg-black/70 flex items-center justify-center z-20 p-4"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <form
+            onSubmit={handleSaveFeatured}
+            className="bg-white dark:bg-gray-800 p-4 rounded-lg w-full max-w-xs"
+          >
+            <h3 className="text-foreground font-medium mb-2">Add to Featured</h3>
+            <p className="text-foreground/70 text-sm mb-3">Add a description for this featured image:</p>
+
+            <textarea
+              value={featuredDescription}
+              onChange={(e) => setFeaturedDescription(e.target.value)}
+              className="w-full h-24 p-2 border border-primary-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary mb-3"
+              placeholder="Describe this special moment..."
+            />
+
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-md text-sm"
+                onClick={() => {
+                  setIsAddingToFeatured(false);
+                  setFeaturedDescription('');
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-3 py-1 bg-primary text-white rounded-md text-sm"
+              >
+                Add to Featured
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </motion.div>
   );
 }

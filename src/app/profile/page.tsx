@@ -1,19 +1,65 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { FaHeart, FaUser, FaEnvelope, FaSignOutAlt, FaImages } from 'react-icons/fa';
+// import { FaHeart, FaUser, FaEnvelope, FaSignOutAlt, FaImages } from 'react-icons/fa';
 import { useAuth } from '@/context/AuthContext';
 import { useGallery } from '@/context/GalleryContext';
 import Navbar from '@/components/Navbar';
 import HeartRain, { HeartDirectionSlider } from '@/components/HeartRain';
+import ProfileHeader from '@/components/profile/ProfileHeader';
+import ProfileBio from '@/components/profile/ProfileBio';
+import ProfileDetails from '@/components/profile/ProfileDetails';
+import GalleryStats from '@/components/profile/GalleryStats';
+import LogoutButton from '@/components/profile/LogoutButton';
+import { UserProfile } from '@/types/profile';
+import toast from 'react-hot-toast';
 
 export default function ProfilePage() {
   const [heartDirection, setHeartDirection] = useState(50);
   const { user, logout, loading: authLoading } = useAuth();
   const { images, sections } = useGallery();
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Profile editing state
+  const [isEditing, setIsEditing] = useState(false);
+  const [profile, setProfile] = useState<UserProfile>({
+    displayName: '',
+    bio: 'Share your story here...',
+    location: '',
+    birthdate: '',
+    instagram: '',
+    facebook: '',
+    twitter: '',
+    profileImage: null
+  });
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  
+  // Initialize profile with user data
+  useEffect(() => {
+    if (user) {
+      setProfile(prev => ({
+        ...prev,
+        displayName: user.displayName || '',
+        // Use localStorage to persist profile data
+        bio: localStorage.getItem(`profile_bio_${user.uid}`) || 'Share your story here...',
+        location: localStorage.getItem(`profile_location_${user.uid}`) || '',
+        birthdate: localStorage.getItem(`profile_birthdate_${user.uid}`) || '',
+        instagram: localStorage.getItem(`profile_instagram_${user.uid}`) || '',
+        facebook: localStorage.getItem(`profile_facebook_${user.uid}`) || '',
+        twitter: localStorage.getItem(`profile_twitter_${user.uid}`) || '',
+        profileImage: localStorage.getItem(`profile_image_${user.uid}`) || null
+      }));
+      
+      // Set image preview if available
+      const savedImage = localStorage.getItem(`profile_image_${user.uid}`);
+      if (savedImage) {
+        setImagePreview(savedImage);
+      }
+    }
+  }, [user]);
   
   // Redirect if not logged in
   useEffect(() => {
@@ -31,17 +77,80 @@ export default function ProfilePage() {
     }
   };
   
+  // Handle profile image upload
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        setImagePreview(result);
+        setProfile(prev => ({ ...prev, profileImage: result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  
+  // Handle profile update
+  const handleProfileUpdate = () => {
+    if (!user) return;
+    
+    // Save profile data to localStorage
+    localStorage.setItem(`profile_bio_${user.uid}`, profile.bio);
+    localStorage.setItem(`profile_location_${user.uid}`, profile.location);
+    localStorage.setItem(`profile_birthdate_${user.uid}`, profile.birthdate);
+    localStorage.setItem(`profile_instagram_${user.uid}`, profile.instagram);
+    localStorage.setItem(`profile_facebook_${user.uid}`, profile.facebook);
+    localStorage.setItem(`profile_twitter_${user.uid}`, profile.twitter);
+    
+    if (profile.profileImage) {
+      localStorage.setItem(`profile_image_${user.uid}`, profile.profileImage);
+    }
+    
+    setIsEditing(false);
+    toast.success('Profile updated successfully!');
+  };
+  
+  // Handle input change
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setProfile(prev => ({ ...prev, [name]: value }));
+  };
+  
+  // Cancel editing
+  const handleCancelEdit = () => {
+    // Reset to saved values
+    if (user) {
+      setProfile(prev => ({
+        ...prev,
+        displayName: user.displayName || '',
+        bio: localStorage.getItem(`profile_bio_${user.uid}`) || 'Share your story here...',
+        location: localStorage.getItem(`profile_location_${user.uid}`) || '',
+        birthdate: localStorage.getItem(`profile_birthdate_${user.uid}`) || '',
+        instagram: localStorage.getItem(`profile_instagram_${user.uid}`) || '',
+        facebook: localStorage.getItem(`profile_facebook_${user.uid}`) || '',
+        twitter: localStorage.getItem(`profile_twitter_${user.uid}`) || '',
+      }));
+      
+      // Reset image preview
+      const savedImage = localStorage.getItem(`profile_image_${user.uid}`);
+      setImagePreview(savedImage);
+    }
+    
+    setIsEditing(false);
+  };
+
   if (authLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
-          <FaHeart className="text-primary text-4xl mx-auto animate-pulse" />
+          <div className="text-primary text-4xl mx-auto animate-pulse">❤️</div>
           <p className="mt-4 text-foreground">Loading your profile...</p>
         </div>
       </div>
     );
   }
-  
+
   // Calculate stats
   const totalImages = images.length;
   const sectionCounts = sections.reduce((acc, section) => {
@@ -52,6 +161,8 @@ export default function ProfilePage() {
     return acc;
   }, {} as Record<string, number>);
   
+  const sectionCount = Object.keys(sectionCounts).length;
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -61,94 +172,51 @@ export default function ProfilePage() {
       <HeartDirectionSlider value={heartDirection} onChange={setHeartDirection} />
       
       <main className="container mx-auto px-4 pt-24 pb-32">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="bg-card-bg dark:bg-[#3a2222] rounded-xl shadow-xl overflow-hidden"
           >
             {/* Profile Header */}
-            <div className="bg-gradient-to-r from-primary-dark to-primary p-6 text-white">
-              <div className="flex items-center">
-                <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center text-white">
-                  <FaUser size={40} />
-                </div>
-                <div className="ml-6">
-                  <h1 className="text-2xl font-bold">{user.displayName || 'User'}</h1>
-                  <p className="text-white/80 flex items-center mt-1">
-                    <FaEnvelope className="mr-2" />
-                    {user.email}
-                  </p>
-                </div>
-              </div>
-            </div>
+            <ProfileHeader 
+              user={user}
+              profile={profile}
+              isEditing={isEditing}
+              imagePreview={imagePreview}
+              setIsEditing={setIsEditing}
+              handleInputChange={handleInputChange}
+              handleProfileUpdate={handleProfileUpdate}
+              handleCancelEdit={handleCancelEdit}
+              handleImageUpload={handleImageUpload}
+            />
             
             {/* Profile Content */}
             <div className="p-6">
-              <h2 className="text-xl font-semibold text-foreground mb-4 flex items-center">
-                <FaHeart className="text-primary mr-2" />
-                Your Gallery Stats
-              </h2>
+              {/* Bio Section */}
+              <ProfileBio 
+                profile={profile}
+                isEditing={isEditing}
+                handleInputChange={handleInputChange}
+              />
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div className="bg-white/50 dark:bg-[#2d1a1a]/50 rounded-lg p-4 flex items-center">
-                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary mr-4">
-                    <FaImages size={24} />
-                  </div>
-                  <div>
-                    <p className="text-foreground/70 text-sm">Total Images</p>
-                    <p className="text-2xl font-bold text-foreground">{totalImages}</p>
-                  </div>
-                </div>
-                
-                <div className="bg-white/50 dark:bg-[#2d1a1a]/50 rounded-lg p-4 flex items-center">
-                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary mr-4">
-                    <FaHeart size={24} />
-                  </div>
-                  <div>
-                    <p className="text-foreground/70 text-sm">Sections</p>
-                    <p className="text-2xl font-bold text-foreground">{Object.keys(sectionCounts).length}</p>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Section Breakdown */}
-              {Object.keys(sectionCounts).length > 0 && (
-                <div className="mt-8">
-                  <h3 className="text-lg font-medium text-foreground mb-4">Section Breakdown</h3>
-                  <div className="space-y-3">
-                    {Object.entries(sectionCounts).map(([section, count]) => (
-                      <div key={section} className="flex items-center">
-                        <div className="w-full bg-white/30 dark:bg-[#2d1a1a]/70 rounded-full h-4 mr-4 overflow-hidden">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${(count / totalImages) * 100}%` }}
-                            transition={{ duration: 1, delay: 0.2 }}
-                            className="h-full bg-primary"
-                          />
-                        </div>
-                        <div className="flex justify-between items-center min-w-[100px]">
-                          <span className="text-foreground">{section}</span>
-                          <span className="text-foreground font-medium">{count}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+              {/* Additional Profile Fields (only shown when editing) */}
+              {isEditing && (
+                <ProfileDetails 
+                  profile={profile}
+                  handleInputChange={handleInputChange}
+                />
               )}
               
-              {/* Actions */}
-              <div className="mt-8 flex justify-center">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleLogout}
-                  className="flex items-center px-6 py-3 bg-primary text-white rounded-full hover:bg-primary-dark transition-colors"
-                >
-                  <FaSignOutAlt className="mr-2" />
-                  Sign Out
-                </motion.button>
-              </div>
+              {/* Gallery Stats */}
+              <GalleryStats 
+                totalImages={totalImages}
+                sectionCount={sectionCount}
+                sectionCounts={sectionCounts}
+              />
+              
+              {/* Logout Button */}
+              <LogoutButton onLogout={handleLogout} />
             </div>
           </motion.div>
         </div>

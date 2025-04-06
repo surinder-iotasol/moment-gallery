@@ -68,6 +68,8 @@ console.log(filteredImages,'filteredImages')
             imageUrl={image.url}
             moment={image.moment}
             section={image.section}
+            featured={image.featured}
+            description={image.description}
             onView={() => onViewImage(image.id)}
           />
         </motion.div>

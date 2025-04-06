@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { FaHeart, FaEnvelope, FaLock, FaSignInAlt } from 'react-icons/fa';
 import { useAuth } from '@/context/AuthContext';
+// Note: We're still using the AuthContext, but it's now a wrapper around Redux
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -15,7 +16,7 @@ export default function LoginPage() {
   const { login, error, loading } = useAuth();
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!email || !password) {
@@ -25,7 +26,8 @@ export default function LoginPage() {
 
     try {
       setLocalError('');
-      await login(email, password);
+      // Redux saga will handle the async operation
+      login(email, password);
       router.push('/gallery');
     } catch (error) {
       setLocalError('Failed to log in. Please check your credentials.');

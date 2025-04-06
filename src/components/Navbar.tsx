@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
+// Note: We're still using the AuthContext, but it's now a wrapper around Redux
 import { FaHeart, FaSignInAlt, FaUserPlus, FaSignOutAlt, FaUser } from 'react-icons/fa';
 import ThemeToggle from './ThemeToggle';
 import { motion } from 'framer-motion';
@@ -26,6 +27,7 @@ export default function Navbar() {
   }, []);
 
   const handleLogout = () => {
+    // Redux saga will handle the async operation
     logout();
   };
 
