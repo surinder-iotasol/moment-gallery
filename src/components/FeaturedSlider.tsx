@@ -61,9 +61,9 @@ export default function FeaturedSlider() {
   const updateInterval = (value: number) => {
     const validValue = Math.max(1000, Math.min(value, 10000));
     setSettings((prev) => ({ ...prev, interval: validValue }));
-    
+
     if (swiperRef.current?.autoplay) {
-      swiperRef.current.params.autoplay = { 
+      swiperRef.current.params.autoplay = {
         delay: validValue,
         disableOnInteraction: false
       };
@@ -77,7 +77,7 @@ export default function FeaturedSlider() {
   const updateSpeed = (value: number) => {
     const validValue = Math.max(200, Math.min(value, 1000));
     setSettings((prev) => ({ ...prev, speed: validValue }));
-    
+
     if (swiperRef.current) {
       swiperRef.current.params.speed = validValue;
     }
@@ -104,7 +104,7 @@ export default function FeaturedSlider() {
           prevEl: '.swiper-button-prev',
           nextEl: '.swiper-button-next',
         }}
-        pagination={{ 
+        pagination={{
           clickable: true,
         }}
         autoplay={

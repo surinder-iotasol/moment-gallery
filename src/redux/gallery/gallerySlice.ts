@@ -2,7 +2,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Image } from '@/services/galleryService';
 import { DocumentData, QueryDocumentSnapshot } from 'firebase/firestore';
-import { DEFAULT_SECTIONS, IMAGES_PER_BATCH } from '@/services/galleryService';
+import { DEFAULT_SECTIONS,  } from '@/services/galleryService';
 
 interface GalleryState {
   images: Image[];

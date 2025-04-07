@@ -2,6 +2,7 @@ import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import { persistStore, persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import createSagaMiddleware from 'redux-saga';
+import logger from 'redux-logger';
 import authReducer from '../slices/authSlice';
 import rootSaga from '../sagas';
 import galleryReducer from '../gallery/gallerySlice';
@@ -49,7 +50,8 @@ export const store = configureStore({
           'auth.user'
         ],
       },
-    }).concat(sagaMiddleware),
+    }).concat(sagaMiddleware, logger),  // Add logger middleware here
+  devTools: process.env.NODE_ENV !== 'production', // Enable Redux DevTools only in development
 });
 
 // Run saga

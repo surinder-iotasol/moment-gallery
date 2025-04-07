@@ -1,5 +1,5 @@
 // src/store/sagas/gallerySaga.ts
-import { call, put, takeLatest, select } from 'redux-saga/effects';
+import { call, put, takeLatest, select, all } from 'redux-saga/effects';
 import { PayloadAction } from '@reduxjs/toolkit';
 import { galleryService, Image } from '@/services/galleryService';
 import {
@@ -75,8 +75,8 @@ function* fetchInitialDataSaga(action: PayloadAction<string>): SagaGenerator {
       call(galleryService.fetchImagesBySection, userId, section, galleryService.IMAGES_PER_SECTION)
     );
 
-    const sectionResults: SectionResult[] = yield Promise.all(sectionFetchPromises);
-
+    // Use the all effect from redux-saga instead of Promise.all
+    const sectionResults: SectionResult[] = yield all(sectionFetchPromises);
     // Process results
     sectionResults.forEach((result: SectionResult, index: number) => {
       const section: string = fetchedSections[index];
@@ -85,6 +85,7 @@ function* fetchInitialDataSaga(action: PayloadAction<string>): SagaGenerator {
       // Add images to the map to avoid duplicates
       images.forEach((image: Image) => {
         allImageMap.set(image.id, image);
+
 
         // Set flip settings for each image
         initialFlipSettings[image.id] = true; // Default to flip on hover
