@@ -31,7 +31,7 @@ export default function FeaturedSlider() {
   const { featuredImages } = useGallery();
   const [settings, setSettings] = useState<SliderSettings>(DEFAULT_SETTINGS);
   const [showSettings, setShowSettings] = useState(false);
-  const swiperRef = useRef<SwiperType>();
+  const swiperRef = useRef<SwiperType>(null);
 
   // Cleanup effect
   useEffect(() => {

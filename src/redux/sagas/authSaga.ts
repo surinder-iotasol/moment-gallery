@@ -1,29 +1,29 @@
-import { call, put, takeLatest, take, fork, all } from 'redux-saga/effects';
-import { PayloadAction } from '@reduxjs/toolkit';
-import { eventChannel, EventChannel } from 'redux-saga';
-import { 
-  User, 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, 
-  signOut, 
-  onAuthStateChanged,
-  updateProfile
-} from 'firebase/auth';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { auth } from '@/lib/firebase';
 import { serializeUser } from '@/utils/authUtils';
+import { PayloadAction } from '@reduxjs/toolkit';
 import {
-  setUser,
-  setLoading,
-  setError,
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
+  updateProfile,
+  User
+} from 'firebase/auth';
+import { eventChannel, EventChannel } from 'redux-saga';
+import { all, call, fork, put, take, takeLatest } from 'redux-saga/effects';
+import {
+  loginFailure,
   loginRequest,
   loginSuccess,
-  loginFailure,
-  signupRequest,
-  signupSuccess,
-  signupFailure,
+  logoutFailure,
   logoutRequest,
   logoutSuccess,
-  logoutFailure
+  setLoading,
+  setUser,
+  signupFailure,
+  signupRequest,
+  signupSuccess
 } from '../slices/authSlice';
 
 // Create an event channel for auth state changes
@@ -43,12 +43,12 @@ function createAuthChannel() {
 
 // Watch for auth state changes
 function* watchAuthState() {
-  const authChannel = yield call(createAuthChannel);
+  const authChannel: EventChannel<{ user: User | null }> = yield call(createAuthChannel);
   
   try {
     while (true) {
       // Use the take effect from redux-saga
-      const payload = yield take(authChannel);
+      const payload: { user: User | null } = yield take(authChannel);
       const user = payload.user;
       
       // Convert Firebase User to serializable object
@@ -65,7 +65,7 @@ function* watchAuthState() {
 }
 
 // Login saga
-function* loginSaga(action: PayloadAction<{ email: string; password: string }>) {
+function* loginSaga(action: PayloadAction<{ email: string; password: string }>): Generator<any, void, any> {
   try {
     const { email, password } = action.payload;
     yield put(setLoading(true));
@@ -86,7 +86,7 @@ function* loginSaga(action: PayloadAction<{ email: string; password: string }>) 
 }
 
 // Signup saga
-function* signupSaga(action: PayloadAction<{ email: string; password: string; displayName: string }>) {
+function* signupSaga(action: PayloadAction<{ email: string; password: string; displayName: string }>): Generator<any, void, any> {
   try {
     const { email, password, displayName } = action.payload;
     yield put(setLoading(true));
