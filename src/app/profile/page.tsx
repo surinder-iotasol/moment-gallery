@@ -13,6 +13,7 @@ import ProfileBio from '@/components/profile/ProfileBio';
 import ProfileDetails from '@/components/profile/ProfileDetails';
 import GalleryStats from '@/components/profile/GalleryStats';
 import LogoutButton from '@/components/profile/LogoutButton';
+import VideoCallButton from '@/components/profile/VideoCallButton';
 import { UserProfile } from '@/types/profile';
 import toast from 'react-hot-toast';
 
@@ -22,7 +23,7 @@ export default function ProfilePage() {
   const { images, sections } = useGallery();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   // Profile editing state
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState<UserProfile>({
@@ -36,7 +37,7 @@ export default function ProfilePage() {
     profileImage: null
   });
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  
+
   // Initialize profile with user data
   useEffect(() => {
     if (user) {
@@ -52,7 +53,7 @@ export default function ProfilePage() {
         twitter: localStorage.getItem(`profile_twitter_${user.uid}`) || '',
         profileImage: localStorage.getItem(`profile_image_${user.uid}`) || null
       }));
-      
+
       // Set image preview if available
       const savedImage = localStorage.getItem(`profile_image_${user.uid}`);
       if (savedImage) {
@@ -60,14 +61,14 @@ export default function ProfilePage() {
       }
     }
   }, [user]);
-  
+
   // Redirect if not logged in
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/auth/login');
     }
   }, [user, authLoading, router]);
-  
+
   const handleLogout = async () => {
     try {
       await logout();
@@ -76,7 +77,7 @@ export default function ProfilePage() {
       console.error('Failed to log out', error);
     }
   };
-  
+
   // Handle profile image upload
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -90,11 +91,11 @@ export default function ProfilePage() {
       reader.readAsDataURL(file);
     }
   };
-  
+
   // Handle profile update
   const handleProfileUpdate = () => {
     if (!user) return;
-    
+
     // Save profile data to localStorage
     localStorage.setItem(`profile_bio_${user.uid}`, profile.bio);
     localStorage.setItem(`profile_location_${user.uid}`, profile.location);
@@ -102,21 +103,21 @@ export default function ProfilePage() {
     localStorage.setItem(`profile_instagram_${user.uid}`, profile.instagram);
     localStorage.setItem(`profile_facebook_${user.uid}`, profile.facebook);
     localStorage.setItem(`profile_twitter_${user.uid}`, profile.twitter);
-    
+
     if (profile.profileImage) {
       localStorage.setItem(`profile_image_${user.uid}`, profile.profileImage);
     }
-    
+
     setIsEditing(false);
     toast.success('Profile updated successfully!');
   };
-  
+
   // Handle input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setProfile(prev => ({ ...prev, [name]: value }));
   };
-  
+
   // Cancel editing
   const handleCancelEdit = () => {
     // Reset to saved values
@@ -131,12 +132,12 @@ export default function ProfilePage() {
         facebook: localStorage.getItem(`profile_facebook_${user.uid}`) || '',
         twitter: localStorage.getItem(`profile_twitter_${user.uid}`) || '',
       }));
-      
+
       // Reset image preview
       const savedImage = localStorage.getItem(`profile_image_${user.uid}`);
       setImagePreview(savedImage);
     }
-    
+
     setIsEditing(false);
   };
 
@@ -160,17 +161,17 @@ export default function ProfilePage() {
     }
     return acc;
   }, {} as Record<string, number>);
-  
+
   const sectionCount = Object.keys(sectionCounts).length;
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       {/* Heart Rain Background */}
       <HeartRain direction={heartDirection} />
       <HeartDirectionSlider value={heartDirection} onChange={setHeartDirection} />
-      
+
       <main className="container mx-auto px-4 pt-24 pb-32">
         <div className="max-w-4xl mx-auto">
           <motion.div
@@ -179,7 +180,7 @@ export default function ProfilePage() {
             className="bg-card-bg dark:bg-[#3a2222] rounded-xl shadow-xl overflow-hidden"
           >
             {/* Profile Header */}
-            <ProfileHeader 
+            <ProfileHeader
               user={user}
               profile={profile}
               isEditing={isEditing}
@@ -190,33 +191,36 @@ export default function ProfilePage() {
               handleCancelEdit={handleCancelEdit}
               handleImageUpload={handleImageUpload}
             />
-            
+
             {/* Profile Content */}
             <div className="p-6">
               {/* Bio Section */}
-              <ProfileBio 
+              <ProfileBio
                 profile={profile}
                 isEditing={isEditing}
                 handleInputChange={handleInputChange}
               />
-              
+
               {/* Additional Profile Fields (only shown when editing) */}
               {isEditing && (
-                <ProfileDetails 
+                <ProfileDetails
                   profile={profile}
                   handleInputChange={handleInputChange}
                 />
               )}
-              
+
               {/* Gallery Stats */}
-              <GalleryStats 
+              <GalleryStats
                 totalImages={totalImages}
                 sectionCount={sectionCount}
                 sectionCounts={sectionCounts}
               />
-              
-              {/* Logout Button */}
-              <LogoutButton onLogout={handleLogout} />
+
+              {/* Video Call and Logout Buttons */}
+              <div className="mt-8 flex flex-col md:flex-row items-center justify-center gap-4">
+                <VideoCallButton />
+                <LogoutButton onLogout={handleLogout} />
+              </div>
             </div>
           </motion.div>
         </div>

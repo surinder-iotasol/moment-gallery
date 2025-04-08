@@ -3,6 +3,7 @@
 import { useAuth } from '@/context/AuthContext';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { FaVideo } from 'react-icons/fa';
 
 export default function CallToActionSection() {
   const { user } = useAuth();
@@ -26,15 +27,27 @@ export default function CallToActionSection() {
 
           <div className="flex flex-wrap justify-center gap-4">
             {user ? (
-              <Link href="/gallery">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-8 py-3 bg-white text-primary rounded-full font-medium"
-                >
-                  Go to Gallery
-                </motion.button>
-              </Link>
+              <>
+                <Link href="/gallery">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-8 py-3 bg-white text-primary rounded-full font-medium"
+                  >
+                    Go to Gallery
+                  </motion.button>
+                </Link>
+                <Link href="/video-call">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-8 py-3 bg-transparent border border-white text-white rounded-full font-medium hover:bg-white/10 transition-colors flex items-center"
+                  >
+                    <FaVideo className="mr-2" />
+                    Video Call
+                  </motion.button>
+                </Link>
+              </>
             ) : (
               <>
                 <Link href="/auth/signup">

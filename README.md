@@ -9,6 +9,7 @@ A visually appealing website with a romantic theme, featuring a rain of hearts i
 - **Interactive Gallery**: Display images in cards that flip when hovered over
 - **User Authentication**: Firebase authentication for secure login and signup
 - **Image Storage**: Cloudinary integration for storing and managing images
+- **Private Video Calling**: WebRTC-based video calling feature for couples with unique room IDs
 - **Responsive Design**: Looks great on both mobile and desktop devices
 
 ## Technologies Used
@@ -18,6 +19,7 @@ A visually appealing website with a romantic theme, featuring a rain of hearts i
 - TypeScript
 - Firebase (Authentication, Firestore)
 - Cloudinary (Image Storage)
+- WebRTC & Socket.IO (Video Calling)
 - Framer Motion (Animations)
 - React Icons
 - React Dropzone (Image Upload)

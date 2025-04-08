@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 // Note: We're still using the AuthContext, but it's now a wrapper around Redux
-import { FaHeart, FaSignInAlt, FaUserPlus, FaSignOutAlt, FaUser } from 'react-icons/fa';
+import { FaHeart, FaSignInAlt, FaUserPlus, FaSignOutAlt, FaUser, FaVideo } from 'react-icons/fa';
 import ThemeToggle from './ThemeToggle';
 import { motion } from 'framer-motion';
 
@@ -78,6 +78,13 @@ export default function Navbar() {
                   className="px-3 py-2 rounded-md text-sm font-medium text-foreground hover:text-primary transition-colors"
                 >
                   Profile
+                </Link>
+                <Link
+                  href="/video-call"
+                  className="px-3 py-2 rounded-md text-sm font-medium text-foreground hover:text-primary transition-colors"
+                >
+                  <FaVideo className="inline mr-1" />
+                  Video Call
                 </Link>
                 <button
                   onClick={handleLogout}
@@ -175,6 +182,14 @@ export default function Navbar() {
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Profile
+                </Link>
+                <Link
+                  href="/video-call"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:text-primary transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <FaVideo className="inline mr-2" />
+                  Video Call
                 </Link>
                 <button
                   onClick={() => {

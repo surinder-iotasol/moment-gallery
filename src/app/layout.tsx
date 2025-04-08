@@ -6,6 +6,7 @@ import { ReduxProvider } from "@/redux/provider";
 import { AuthProvider } from "@/context/AuthContext";
 import { GalleryProvider } from "@/context/GalleryContext";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { VideoCallProvider } from "@/context/VideoCallContext";
 import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
@@ -41,8 +42,9 @@ export default function RootLayout({
           <ThemeProvider>
             <AuthProvider>
               <GalleryProvider>
-                {children}
-                <Toaster
+                <VideoCallProvider>
+                  {children}
+                  <Toaster
                   position="top-right"
                   toastOptions={{
                     duration: 4000,
@@ -67,6 +69,7 @@ export default function RootLayout({
                     },
                   }}
                 />
+                </VideoCallProvider>
               </GalleryProvider>
             </AuthProvider>
           </ThemeProvider>
