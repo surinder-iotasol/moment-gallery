@@ -68,7 +68,6 @@ export default function ProfilePage() {
       router.push('/auth/login');
     }
   }, [user, authLoading, router]);
-
   const handleLogout = async () => {
     try {
       await logout();
@@ -151,7 +150,6 @@ export default function ProfilePage() {
       </div>
     );
   }
-
   // Calculate stats
   const totalImages = images.length;
   const sectionCounts = sections.reduce((acc, section) => {

@@ -86,7 +86,6 @@ export default function ImageUpload({ defaultSection }: ImageUploadProps) {
 
     try {
       setIsUploading(true);
-
       // Determine which section to use
       const finalSection = section === 'custom' ? customSection : section;
 

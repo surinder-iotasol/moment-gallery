@@ -26,12 +26,10 @@ export default function SignupPage() {
       setError('Please fill in all fields');
       return;
     }
-
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
     }
-
     if (password.length < 6) {
       setError('Password must be at least 6 characters');
       return;
@@ -50,7 +48,6 @@ export default function SignupPage() {
       setIsLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-background">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -78,7 +75,6 @@ export default function SignupPage() {
           </motion.div>
         ))}
       </div>
-
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -102,14 +98,12 @@ export default function SignupPage() {
             <h1 className="text-2xl font-bold text-foreground">Create Account</h1>
             <p className="text-foreground/70 mt-2">Sign up to store your romantic moments</p>
           </div>
-
           <form onSubmit={handleSubmit}>
             {error && (
               <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 border border-red-400 text-red-700 dark:text-red-300 rounded">
                 {error}
               </div>
             )}
-
             <div className="mb-4">
               <label htmlFor="name" className="block text-sm font-medium text-foreground/80 mb-1">
                 Full Name
@@ -129,7 +123,6 @@ export default function SignupPage() {
                 />
               </div>
             </div>
-
             <div className="mb-4">
               <label htmlFor="email" className="block text-sm font-medium text-foreground/80 mb-1">
                 Email
@@ -149,7 +142,6 @@ export default function SignupPage() {
                 />
               </div>
             </div>
-
             <div className="mb-4">
               <label htmlFor="password" className="block text-sm font-medium text-foreground/80 mb-1">
                 Password
@@ -169,7 +161,6 @@ export default function SignupPage() {
                 />
               </div>
             </div>
-
             <div className="mb-6">
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground/80 mb-1">
                 Confirm Password
@@ -189,7 +180,6 @@ export default function SignupPage() {
                 />
               </div>
             </div>
-
             <button
               type="submit"
               disabled={isLoading}
@@ -215,7 +205,6 @@ export default function SignupPage() {
               )}
             </button>
           </form>
-
           <div className="mt-6 text-center">
             <p className="text-foreground/70">
               Already have an account?{' '}
