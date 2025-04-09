@@ -50,10 +50,21 @@ export function VideoCallProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!socket) {
       // Initialize socket connection
+      const isProduction = process.env.NODE_ENV === 'production';
       const socketUrl = process.env.NEXT_PUBLIC_SOCKET_SERVER_URL || window.location.origin;
-      socket = io(socketUrl, {
-        path: '/api/socket',
-      });
+
+      // Different configuration for production (Netlify) vs development
+      if (isProduction) {
+        console.log('Initializing Socket.IO in production mode');
+        // For Netlify deployment
+        socket = io(socketUrl);
+      } else {
+        console.log('Initializing Socket.IO in development mode');
+        // For local development
+        socket = io(socketUrl, {
+          path: '/api/socket',
+        });
+      }
 
       socket.on('connect', () => {
         console.log('Connected to Socket.IO server');
@@ -61,7 +72,8 @@ export function VideoCallProvider({ children }: { children: ReactNode }) {
 
       socket.on('connect_error', (err: Error) => {
         console.error('Socket connection error:', err);
-        toast.error('Failed to connect to call server');
+        console.error('Error details:', err.message);
+        toast.error('Failed to connect to call server. Please try again.');
       });
     }
 
@@ -207,6 +219,9 @@ export function VideoCallProvider({ children }: { children: ReactNode }) {
       iceServers: [
         { urls: 'stun:stun.l.google.com:19302' },
         { urls: 'stun:stun1.l.google.com:19302' },
+        { urls: 'stun:stun2.l.google.com:19302' },
+        { urls: 'stun:stun3.l.google.com:19302' },
+        { urls: 'stun:stun4.l.google.com:19302' },
       ],
     });
 
@@ -373,7 +388,10 @@ export function VideoCallProvider({ children }: { children: ReactNode }) {
   // Copy room link to clipboard
   const copyRoomLink = () => {
     if (roomId) {
-      const url = `${window.location.origin}/video-call/${roomId}`;
+      // Get the base URL from environment variable or window location
+      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+      const url = `${baseUrl}/video-call/${roomId}`;
+
       navigator.clipboard.writeText(url)
         .then(() => {
           toast.success('Call link copied to clipboard');

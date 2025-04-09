@@ -17,7 +17,10 @@ export default function RoomInfo() {
 
   if (!roomId) return null;
 
-  const roomLink = `${typeof window !== 'undefined' ? window.location.origin : ''}/video-call/${roomId}`;
+  // Get the base URL from environment variable or window location
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ||
+                 (typeof window !== 'undefined' ? window.location.origin : '');
+  const roomLink = `${baseUrl}/video-call/${roomId}`;
 
   return (
     <div className="bg-white/90 dark:bg-[#2d1a1a]/90 backdrop-blur-md p-4 rounded-lg shadow-md mb-4">

@@ -1,0 +1,3 @@
+# Netlify redirects file
+/api/socket/* /.netlify/functions/socket 200
+/* /index.html 200
