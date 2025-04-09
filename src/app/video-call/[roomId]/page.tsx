@@ -12,9 +12,9 @@ import HeartRain from '@/components/HeartRain';
 import LoadingIndicator from '@/components/gallery/LoadingIndicator';
 
 interface VideoCallPageProps {
-  params: {
+  params: Promise<{
     roomId: string;
-  };
+  }>;
 }
 
 export default function VideoCallPage({ params }: VideoCallPageProps) {
