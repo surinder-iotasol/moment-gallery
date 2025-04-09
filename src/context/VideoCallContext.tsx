@@ -190,26 +190,48 @@ export function VideoCallProvider({ children }: { children: ReactNode }) {
 
   // Initialize peer connection
   const initializePeerConnection = async () => {
-    if (!user || !localStream || !socket) return;
+    if (!user || !localStream || !socket) {
+      console.error('Missing required dependencies:', { user: !!user, localStream: !!localStream, socket: !!socket });
+      return;
+    }
 
     try {
+      // Clean up any existing peer connection
+      if (peer) {
+        peer.close();
+        setPeer(null);
+      }
+
       const newPeer = await createPeerConnection();
       setPeer(newPeer);
 
-      // Add local tracks to the peer connection
+      console.log('Adding local tracks to peer connection');
       localStream.getTracks().forEach(track => {
-        newPeer.addTrack(track, localStream);
+        try {
+          newPeer.addTrack(track, localStream);
+        } catch (err) {
+          console.error('Error adding track:', err);
+          toast.error('Failed to add media track');
+        }
       });
 
-      // Create and send offer
-      const offer = await newPeer.createOffer();
+      console.log('Creating offer');
+      const offer = await newPeer.createOffer({
+        offerToReceiveAudio: true,
+        offerToReceiveVideo: true
+      });
+
+      console.log('Setting local description');
       await newPeer.setLocalDescription(offer);
 
-      // Send offer to remote peer
+      console.log('Sending offer to remote peer');
       socket.emit('offer', roomId, offer, user.uid);
+      
+      toast.success('Establishing connection...');
     } catch (error) {
       console.error('Error initializing peer connection:', error);
-      toast.error('Failed to establish connection');
+      toast.error('Failed to establish connection. Please refresh and try again.');
+      handleEndCall();
     }
   };
 
@@ -247,14 +269,33 @@ export function VideoCallProvider({ children }: { children: ReactNode }) {
 
     // Handle connection state changes
     newPeer.onconnectionstatechange = () => {
-      console.log('Connection state:', newPeer.connectionState);
-      if (newPeer.connectionState === 'connected') {
-        setIsCallConnected(true);
-        toast.success('Call connected successfully');
-      } else if (newPeer.connectionState === 'disconnected' ||
-                 newPeer.connectionState === 'failed' ||
-                 newPeer.connectionState === 'closed') {
-        setIsCallConnected(false);
+      console.log('Connection state changed to:', newPeer.connectionState);
+      switch (newPeer.connectionState) {
+        case 'connected':
+          setIsCallConnected(true);
+          toast.success('Call connected successfully');
+          break;
+        case 'disconnected':
+          setIsCallConnected(false);
+          toast.error('Call disconnected');
+          break;
+        case 'failed':
+          setIsCallConnected(false);
+          toast.error('Connection failed. Please refresh and try again.');
+          handleEndCall();
+          break;
+        case 'closed':
+          setIsCallConnected(false);
+          break;
+      }
+    };
+
+    // Handle ICE connection state changes
+    newPeer.oniceconnectionstatechange = () => {
+      console.log('ICE connection state:', newPeer.iceConnectionState);
+      if (newPeer.iceConnectionState === 'failed') {
+        toast.error('Network connection failed. Please check your internet connection.');
+        handleEndCall();
       }
     };
 
