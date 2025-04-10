@@ -3,7 +3,7 @@
   publish = ".next"
 
 [build.environment]
-  NEXT_PUBLIC_SOCKET_SERVER_URL = "https://67f636d425c6ca0008f72672--dainty-shortbread-7cd23d.netlify.app"
+  NEXT_PUBLIC_SOCKET_SERVER_URL = "https://dainty-shortbread-7cd23d.netlify.app"
 
 [[redirects]]
   from = "/api/socket/*"
