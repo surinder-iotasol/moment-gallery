@@ -1,16 +1,16 @@
+
 [build]
   command = "npm run build"
   publish = ".next"
 
 [build.environment]
-  NEXT_PUBLIC_SOCKET_SERVER_URL = "https://dainty-shortbread-7cd23d.netlify.app"
+  NEXT_PUBLIC_SOCKET_SERVER_URL = "dainty-shortbread-cd23d.netlify.app"
 
 [[redirects]]
-  from = "/api/socket/*"
+  from = "/socket.io/*"
   to = "/.netlify/functions/socket"
   status = 200
+  force = true
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-
-

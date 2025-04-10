@@ -56,8 +56,8 @@ export function VideoCallProvider({ children }: { children: ReactNode }) {
       // Different configuration for production (Netlify) vs development
       if (isProduction) {
         console.log('Initializing Socket.IO in production mode');
-        // For Netlify deployment
-        socket = io(socketUrl);
+        // For Netlify deployment, path should be /socket.io for Netlify functions
+        socket = io(socketUrl, { path: '/socket.io' });
       } else {
         console.log('Initializing Socket.IO in development mode');
         // For local development
@@ -82,6 +82,8 @@ export function VideoCallProvider({ children }: { children: ReactNode }) {
       if (localStream) {
         localStream.getTracks().forEach(track => track.stop());
       }
+      socket?.disconnect();
+      socket = null;
     };
   }, [localStream]);
 
@@ -226,7 +228,7 @@ export function VideoCallProvider({ children }: { children: ReactNode }) {
 
       console.log('Sending offer to remote peer');
       socket.emit('offer', roomId, offer, user.uid);
-      
+
       toast.success('Establishing connection...');
     } catch (error) {
       console.error('Error initializing peer connection:', error);
