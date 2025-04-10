@@ -241,26 +241,25 @@ export function VideoCallProvider({ children }: { children: ReactNode }) {
   const createPeerConnection = async () => {
     const newPeer = new RTCPeerConnection({
       iceServers: [
-        { 
-          urls: [
-            'stun:stun.l.google.com:19302',
-            'stun:stun1.l.google.com:19302'
-          ]
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' },
+        { urls: 'stun:stun2.l.google.com:19302' },
+        { urls: 'stun:stun3.l.google.com:19302' },
+        { urls: 'stun:stun4.l.google.com:19302' },
+        { urls: 'stun:stun.stunprotocol.org:3478' },
+        { urls: 'stun:stun.ekiga.net:3478' },
+        {
+          urls: 'turn:openrelay.metered.ca:80',
+          username: 'openrelayproject',
+          credential: 'openrelayproject',
         },
         {
-          urls: [
-            'turn:global.turn.twilio.com:3478?transport=udp',
-            'turn:global.turn.twilio.com:3478?transport=tcp',
-            'turn:global.turn.twilio.com:443?transport=tcp'
-          ],
-          username: 'your_twilio_username', // You should add these to environment variables
-          credential: 'your_twilio_credential'
-        }
+          urls: 'turn:openrelay.metered.ca:443',
+          username: 'openrelayproject',
+          credential: 'openrelayproject',
+        },
       ],
       iceCandidatePoolSize: 10,
-      bundlePolicy: 'max-bundle',
-      rtcpMuxPolicy: 'require',
-      iceTransportPolicy: 'all',
     });
 
     // Handle ICE candidates
@@ -274,47 +273,22 @@ export function VideoCallProvider({ children }: { children: ReactNode }) {
     newPeer.onconnectionstatechange = () => {
       console.log('Connection state changed to:', newPeer.connectionState);
       switch (newPeer.connectionState) {
-        case 'new':
-          console.log('Starting new connection...');
-          break;
-        case 'connecting':
-          console.log('Establishing connection...');
-          toast.loading('Connecting to peer...');
-          break;
         case 'connected':
           setIsCallConnected(true);
           toast.success('Call connected successfully');
           break;
         case 'disconnected':
           setIsCallConnected(false);
-          toast.error('Call disconnected, attempting to reconnect...');
-          // Attempt to reconnect
-          initializePeerConnection();
+          toast.error('Call disconnected');
           break;
         case 'failed':
           setIsCallConnected(false);
-          console.error('Connection failed:', newPeer.iceConnectionState);
-          toast.error('Connection failed. Please check your internet connection.');
+          toast.error('Connection failed. Please refresh and try again.');
           handleEndCall();
           break;
         case 'closed':
           setIsCallConnected(false);
-          console.log('Connection closed');
           break;
-      }
-    };
-
-    // Add negotiation needed handler
-    newPeer.onnegotiationneeded = async () => {
-      console.log('Negotiation needed');
-      try {
-        const offer = await newPeer.createOffer();
-        await newPeer.setLocalDescription(offer);
-        if (socket && roomId && user) {
-          socket.emit('offer', roomId, offer, user.uid);
-        }
-      } catch (err) {
-        console.error('Error during negotiation:', err);
       }
     };
 
