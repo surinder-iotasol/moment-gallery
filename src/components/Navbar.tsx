@@ -79,13 +79,13 @@ export default function Navbar() {
                 >
                   Profile
                 </Link>
-                <Link
+                {/* <Link
                   href="/video-call"
                   className="px-3 py-2 rounded-md text-sm font-medium text-foreground hover:text-primary transition-colors"
                 >
                   <FaVideo className="inline mr-1" />
                   Video Call
-                </Link>
+                </Link> */}
                 <button
                   onClick={handleLogout}
                   className="flex items-center px-4 py-2 rounded-full bg-primary text-white hover:bg-primary-dark transition-colors"
@@ -183,14 +183,14 @@ export default function Navbar() {
                 >
                   Profile
                 </Link>
-                <Link
+                {/* <Link
                   href="/video-call"
                   className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:text-primary transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <FaVideo className="inline mr-2" />
                   Video Call
-                </Link>
+                </Link> */}
                 <button
                   onClick={() => {
                     handleLogout();

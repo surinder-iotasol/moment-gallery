@@ -9,7 +9,6 @@ A visually appealing website with a romantic theme, featuring a rain of hearts i
 - **Interactive Gallery**: Display images in cards that flip when hovered over
 - **User Authentication**: Firebase authentication for secure login and signup
 - **Image Storage**: Cloudinary integration for storing and managing images
-- **Private Video Calling**: WebRTC-based video calling feature for couples with unique room IDs
 - **Responsive Design**: Looks great on both mobile and desktop devices
 
 ## Technologies Used
@@ -19,7 +18,6 @@ A visually appealing website with a romantic theme, featuring a rain of hearts i
 - TypeScript
 - Firebase (Authentication, Firestore)
 - Cloudinary (Image Storage)
-- WebRTC & Socket.IO (Video Calling)
 - Framer Motion (Animations)
 - React Icons
 - React Dropzone (Image Upload)
@@ -37,12 +35,14 @@ A visually appealing website with a romantic theme, featuring a rain of hearts i
 ### Installation
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/yourusername/romantic-moments-gallery.git
    cd romantic-moments-gallery
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    # or
@@ -50,6 +50,7 @@ A visually appealing website with a romantic theme, featuring a rain of hearts i
    ```
 
 3. Create a `.env.local` file in the root directory with your Firebase and Cloudinary credentials (see `.env.local.example` for reference):
+
    ```
    # Firebase Configuration
    NEXT_PUBLIC_FIREBASE_API_KEY=your-api-key
@@ -66,6 +67,7 @@ A visually appealing website with a romantic theme, featuring a rain of hearts i
    ```
 
 4. Run the development server:
+
    ```bash
    npm run dev
    # or
