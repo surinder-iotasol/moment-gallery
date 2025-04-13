@@ -6,7 +6,7 @@ import { ReduxProvider } from "@/redux/provider";
 import { AuthProvider } from "@/context/AuthContext";
 import { GalleryProvider } from "@/context/GalleryContext";
 import { ThemeProvider } from "@/context/ThemeContext";
-import { VideoCallProvider } from "@/context/VideoCallContext";
+
 import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
@@ -21,7 +21,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Romantic Moments Gallery",
-  description: "A beautiful gallery to store your romantic moments and memories",
+  description:
+    "A beautiful gallery to store your romantic moments and memories",
   keywords: ["romantic", "gallery", "memories", "love", "moments", "photos"],
 };
 
@@ -42,34 +43,32 @@ export default function RootLayout({
           <ThemeProvider>
             <AuthProvider>
               <GalleryProvider>
-                <VideoCallProvider>
-                  {children}
-                  <Toaster
+                {children}
+                <Toaster
                   position="top-right"
                   toastOptions={{
                     duration: 4000,
                     style: {
-                      background: 'var(--background)',
-                      color: 'var(--foreground)',
-                      border: '1px solid var(--primary)',
-                      padding: '16px',
-                      borderRadius: '10px',
+                      background: "var(--background)",
+                      color: "var(--foreground)",
+                      border: "1px solid var(--primary)",
+                      padding: "16px",
+                      borderRadius: "10px",
                     },
                     success: {
                       iconTheme: {
-                        primary: '#e11d48',
-                        secondary: 'white',
+                        primary: "#e11d48",
+                        secondary: "white",
                       },
                     },
                     error: {
                       iconTheme: {
-                        primary: '#e11d48',
-                        secondary: 'white',
+                        primary: "#e11d48",
+                        secondary: "white",
                       },
                     },
                   }}
                 />
-                </VideoCallProvider>
               </GalleryProvider>
             </AuthProvider>
           </ThemeProvider>

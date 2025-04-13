@@ -37,7 +37,7 @@ export default function CallToActionSection() {
                     Go to Gallery
                   </motion.button>
                 </Link>
-                <Link href="/video-call">
+                {/* <Link href="/video-call">
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -46,7 +46,7 @@ export default function CallToActionSection() {
                     <FaVideo className="mr-2" />
                     Video Call
                   </motion.button>
-                </Link>
+                </Link> */}
               </>
             ) : (
               <>

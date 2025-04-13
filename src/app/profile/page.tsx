@@ -13,7 +13,6 @@ import ProfileBio from '@/components/profile/ProfileBio';
 import ProfileDetails from '@/components/profile/ProfileDetails';
 import GalleryStats from '@/components/profile/GalleryStats';
 import LogoutButton from '@/components/profile/LogoutButton';
-import VideoCallButton from '@/components/profile/VideoCallButton';
 import { UserProfile } from '@/types/profile';
 import toast from 'react-hot-toast';
 
@@ -216,7 +215,6 @@ export default function ProfilePage() {
 
               {/* Video Call and Logout Buttons */}
               <div className="mt-8 flex flex-col md:flex-row items-center justify-center gap-4">
-                <VideoCallButton />
                 <LogoutButton onLogout={handleLogout} />
               </div>
             </div>
