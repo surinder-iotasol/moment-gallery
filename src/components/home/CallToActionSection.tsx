@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useAuth } from '@/context/AuthContext';
-import { motion } from 'framer-motion';
-import Link from 'next/link';
-import { FaVideo } from 'react-icons/fa';
+import { useAuth } from "@/context/AuthContext";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import { FaVideo } from "react-icons/fa";
 
 export default function CallToActionSection() {
   const { user } = useAuth();
@@ -22,7 +22,8 @@ export default function CallToActionSection() {
             Start Capturing Your Romantic Moments Today
           </h2>
           <p className="text-white/90 text-lg max-w-2xl mx-auto mb-8">
-            Create your free account and begin building your gallery of special memories that you can cherish forever.
+            Create your free account and begin building your gallery of special
+            memories that you can cherish forever.
           </p>
 
           <div className="flex flex-wrap justify-center gap-4">
@@ -37,7 +38,7 @@ export default function CallToActionSection() {
                     Go to Gallery
                   </motion.button>
                 </Link>
-                {/* <Link href="/video-call">
+                <Link href="/video-call">
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -46,7 +47,7 @@ export default function CallToActionSection() {
                     <FaVideo className="mr-2" />
                     Video Call
                   </motion.button>
-                </Link> */}
+                </Link>
               </>
             ) : (
               <>

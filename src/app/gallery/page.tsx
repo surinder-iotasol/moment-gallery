@@ -1,22 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { FaHeart, FaPlus, FaFolderPlus, FaToggleOn, FaToggleOff, FaSpinner } from 'react-icons/fa';
-import { useAuth } from '@/context/AuthContext';
-import { useGallery } from '@/context/GalleryContext';
-import Navbar from '@/components/Navbar';
-import ImageUpload from '@/components/ImageUpload';
-import ImageViewer from '@/components/ImageViewer';
 import AddSectionModal from '@/components/AddSectionModal';
 import HeartRain, { HeartDirectionSlider } from '@/components/HeartRain';
+import ImageUpload from '@/components/ImageUpload';
+import ImageViewer from '@/components/ImageViewer';
+import Navbar from '@/components/Navbar';
+import AllSectionsView from '@/components/gallery/AllSectionsView';
 import GalleryHeader from '@/components/gallery/GalleryHeader';
+import LoadingIndicator from '@/components/gallery/LoadingIndicator';
 import SectionTabs from '@/components/gallery/SectionTabs';
 import SectionView from '@/components/gallery/SectionView';
-import AllSectionsView from '@/components/gallery/AllSectionsView';
-import LoadingIndicator from '@/components/gallery/LoadingIndicator';
 import UploadIndicator from '@/components/gallery/UploadIndicator';
+import { useAuth } from '@/context/AuthContext';
+import { useGallery } from '@/context/GalleryContext';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function GalleryPage() {
   const [selectedSection, setSelectedSection] = useState<string | null>(null);

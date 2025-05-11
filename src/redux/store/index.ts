@@ -32,7 +32,7 @@ const sagaMiddleware = createSagaMiddleware({
   }
 });
 
-// Create store
+// Create Redux store with middleware
 export const store = configureStore({
   reducer: rootReducer,
   middleware: (getDefaultMiddleware) =>
@@ -50,7 +50,7 @@ export const store = configureStore({
           'auth.user'
         ],
       },
-    }).concat(sagaMiddleware, logger),  // Add logger middleware here
+    }).concat(sagaMiddleware, logger),  // Add logger middleware for development
   devTools: process.env.NODE_ENV !== 'production', // Enable Redux DevTools only in development
 });
 

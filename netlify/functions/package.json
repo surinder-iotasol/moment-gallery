@@ -1,8 +1,0 @@
-{
-  "name": "netlify-functions",
-  "version": "1.0.0",
-  "description": "Netlify Functions for Romantic Moments Gallery",
-  "dependencies": {
-    "socket.io": "^4.8.1"
-  }
-}
