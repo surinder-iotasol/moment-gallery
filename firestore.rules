@@ -1,0 +1,70 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow users to read and write their own data
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Gallery images
+    match /images/{imageId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    // Gallery sections
+    match /sections/{sectionId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    // Partner invitations - using the collection name from your code
+    match /partnerInvites/{invitationId} {
+      // Allow sender to read and update their own invitations
+      allow read, update: if request.auth != null && resource.data.senderId == request.auth.uid;
+
+      // Allow recipient to read invitations sent to their email
+      allow read: if request.auth != null && resource.data.recipientEmail == request.auth.token.email;
+
+      // Allow recipient to update status (accept/reject)
+      allow update: if request.auth != null &&
+                     resource.data.recipientEmail == request.auth.token.email &&
+                     request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt']);
+
+      // Allow creation of new invitations
+      allow create: if request.auth != null &&
+                     request.resource.data.senderId == request.auth.uid &&
+                     request.resource.data.senderEmail == request.auth.token.email;
+    }
+
+    // Partner connections - using the collection name from your code
+    match /partnerConnections/{userId} {
+      // Allow users to read their own connections
+      allow read: if request.auth != null && (
+        resource.data.userId == request.auth.uid ||
+        resource.data.partnerId == request.auth.uid
+      );
+
+      // Allow creation of connections when accepting an invitation
+      allow create: if request.auth != null && (
+        request.resource.data.userId == request.auth.uid ||
+        request.resource.data.partnerId == request.auth.uid
+      );
+
+      // Allow updates only by the users involved in the connection
+      allow update: if request.auth != null && (
+        resource.data.userId == request.auth.uid ||
+        resource.data.partnerId == request.auth.uid
+      );
+
+      // Allow deletion only by the users involved in the connection
+      allow delete: if request.auth != null && (
+        resource.data.userId == request.auth.uid ||
+        resource.data.partnerId == request.auth.uid
+      );
+    }
+  }
+}
