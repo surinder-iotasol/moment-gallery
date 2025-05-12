@@ -78,8 +78,7 @@ export function VideoCallProvider({ children }: { children: ReactNode }) {
     if (!user) return;
 
     // Use the environment variable or fallback to localhost for development
-    const socketServerUrl =
-      process.env.NEXT_PUBLIC_SOCKET_SERVER_URL || "http://localhost:5000";
+    const socketServerUrl ='https://video-call-server-se8m.onrender.com';
     console.log("Connecting to socket server at:", socketServerUrl);
 
     // Connect to socket server with explicit CORS settings
