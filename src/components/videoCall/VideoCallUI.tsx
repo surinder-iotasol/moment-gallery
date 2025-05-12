@@ -25,6 +25,7 @@ export default function VideoCallUI() {
     toggleVideo,
     socketRef,
     user,
+    setVideoCallState
   } = useVideoCall();
 
   // Debug log for partner connection status

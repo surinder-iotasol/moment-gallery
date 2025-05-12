@@ -9,8 +9,8 @@ import {
   useRef,
 } from "react";
 import { useAuth } from "./AuthContext";
-import { io } from "socket.io-client";
-import type { Socket } from "socket.io-client";
+import { Socket } from "socket.io-client";
+import io from "socket.io-client";
 import Peer from "simple-peer";
 import { toast } from "react-hot-toast";
 import {
@@ -65,10 +65,10 @@ export function VideoCallProvider({ children }: { children: ReactNode }) {
     useState<PartnerConnection | null>(null);
 
   // Refs
-  const socketRef = useRef<Socket | null>(null);
+  const socketRef = useRef<typeof Socket | null>(null);
   const peerRef = useRef<any>(null);
-  const localVideoRef = useRef<HTMLVideoElement | null>(null);
-  const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
+  // const localVideoRef = useRef<HTMLVideoElement | null>(null);
+  // const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
 
   // Get user from auth context
   const { user } = useAuth();
@@ -91,10 +91,16 @@ export function VideoCallProvider({ children }: { children: ReactNode }) {
       }
 
       socketRef.current = io(socketServerUrl, {
-        withCredentials: false,
+        auth: {
+          token: user.uid
+        },
         transports: ["websocket", "polling"],
-        extraHeaders: {
-          "my-custom-header": "abcd",
+        transportOptions: {
+          polling: {
+            extraHeaders: {
+              "my-custom-header": "abcd",
+            },
+          },
         },
         reconnection: true,
         reconnectionAttempts: 5,
@@ -213,7 +219,7 @@ export function VideoCallProvider({ children }: { children: ReactNode }) {
         }`,
       }));
     }
-
+    if(socketRef.current) {
     // Set up socket event listeners
     socketRef.current.on("me", (socketId: string) => {
       console.log("Received socket ID:", socketId);
@@ -344,7 +350,7 @@ export function VideoCallProvider({ children }: { children: ReactNode }) {
       endCall();
 
       // Notify the user
-      toast.info("Call ended");
+      toast.success("Call ended");
     });
 
     // Handle partner disconnection
@@ -367,6 +373,7 @@ export function VideoCallProvider({ children }: { children: ReactNode }) {
         }
       }
     );
+  }
 
     // Clean up on unmount
     return () => {
@@ -746,7 +753,7 @@ export function VideoCallProvider({ children }: { children: ReactNode }) {
         console.log("Peer connection closed");
         // Only show toast if call was active
         if (videoCallState.isCallActive) {
-          toast.info("Call ended");
+          toast.success("Call ended");
         }
       });
 
@@ -759,7 +766,7 @@ export function VideoCallProvider({ children }: { children: ReactNode }) {
       // For testing: If we're in self-call mode, simulate receiving a call
       if (videoCallState.isSelfCallMode) {
         console.log("Self-call detected, simulating incoming call");
-        toast.info(
+        toast.success(
           "Self-call mode: You will receive a call from yourself in a moment"
         );
 
@@ -870,7 +877,7 @@ export function VideoCallProvider({ children }: { children: ReactNode }) {
       // Try to get user media if not already available
       if (!videoCallState.localStream) {
         console.log("No local stream, requesting media access");
-        toast.info("Accessing camera and microphone...");
+        toast.success("Accessing camera and microphone...");
 
         navigator.mediaDevices
           .getUserMedia({ video: true, audio: true })
@@ -1007,7 +1014,7 @@ export function VideoCallProvider({ children }: { children: ReactNode }) {
       console.log("Peer connection closed");
       // Only show toast if call was active
       if (videoCallState.isCallActive) {
-        toast.info("Call ended");
+        toast.success("Call ended");
       }
     });
 
@@ -1142,7 +1149,7 @@ export function VideoCallProvider({ children }: { children: ReactNode }) {
     };
 
     console.log("Call ended successfully");
-    toast.info("Call ended");
+    toast.success("Call ended");
   };
 
   // Media controls
