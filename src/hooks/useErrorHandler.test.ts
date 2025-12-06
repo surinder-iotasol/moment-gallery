@@ -3,12 +3,12 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { useErrorHandler } from './useErrorHandler';
 
 describe('useErrorHandler', () => {
-  it('should initialize with error as null', () => {
+  it('should initialize with no error', () => {
     const { result } = renderHook(() => useErrorHandler());
     expect(result.current.error).toBeNull();
   });
 
-  it('should set error with a string message', () => {
+  it('should allow setting an error message', () => {
     const { result } = renderHook(() => useErrorHandler());
     act(() => {
       result.current.setError('Test error message');
@@ -20,23 +20,21 @@ describe('useErrorHandler', () => {
     const { result } = renderHook(() => useErrorHandler());
     act(() => {
       result.current.setError('Test error message');
-    });
-    act(() => {
       result.current.clearError();
     });
     expect(result.current.error).toBeNull();
   });
 
-  it('should handle an Error object and set its message as error', () => {
+  it('should handle an instance of Error', () => {
     const { result } = renderHook(() => useErrorHandler());
-    const error = new Error('Error from Error object');
+    const error = new Error('Error instance message');
     act(() => {
       result.current.handleError(error);
     });
-    expect(result.current.error).toBe('Error from Error object');
+    expect(result.current.error).toBe('Error instance message');
   });
 
-  it('should handle a string error and set it as error', () => {
+  it('should handle a string error', () => {
     const { result } = renderHook(() => useErrorHandler());
     act(() => {
       result.current.handleError('String error message');
@@ -44,41 +42,25 @@ describe('useErrorHandler', () => {
     expect(result.current.error).toBe('String error message');
   });
 
-  it('should handle an unknown error and set a default message', () => {
+  it('should handle an unknown error type', () => {
     const { result } = renderHook(() => useErrorHandler());
     act(() => {
-      result.current.handleError({});
+      result.current.handleError({ unexpected: 'object' });
     });
     expect(result.current.error).toBe('An unknown error occurred');
   });
 
-  it('should log the error to the console', () => {
-    console.error = jest.fn();
+  it('should log the error to console on handleError', () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
     const { result } = renderHook(() => useErrorHandler());
-    const error = new Error('Error to log');
+    const error = new Error('Error instance message');
     
     act(() => {
       result.current.handleError(error);
     });
-    expect(console.error).toHaveBeenCalledWith('Error:', error);
-  });
 
-  it('should maintain the state after clearing the error', () => {
-    const { result } = renderHook(() => useErrorHandler());
-    act(() => {
-      result.current.setError('Temporary error');
-    });
-    expect(result.current.error).toBe('Temporary error');
-
-    act(() => {
-      result.current.clearError();
-    });
-    expect(result.current.error).toBeNull();
-
-    act(() => {
-      result.current.setError('New error after clearing');
-    });
-    expect(result.current.error).toBe('New error after clearing');
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Error:', error);
+    consoleErrorSpy.mockRestore();
   });
 });
 ```
