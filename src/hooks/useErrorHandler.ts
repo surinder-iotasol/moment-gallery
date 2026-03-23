@@ -16,6 +16,8 @@ export function useErrorHandler(): ErrorHandlerResult {
     setError(null);
   }, []);
 
+  var hello =99;
+
   const handleError = useCallback((error: unknown) => {
     if (error instanceof Error) {
       setError(error.message);

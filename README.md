@@ -2,7 +2,7 @@
 
 A visually appealing website with a romantic theme, featuring a rain of hearts in the background that changes direction based on a sliding bar. The website includes an interactive gallery where users can store and display images, each paired with meaningful moments.
 
-## Features
+## Features  
 
 - **Heart Rain Animation**: Dynamic background with heart-shaped particles that fall like rain
 - **Direction Control**: Sliding bar with a heart icon to change the direction of the heart rain
